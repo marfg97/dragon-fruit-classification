@@ -1,59 +1,3 @@
-
-
-# import argparse
-# import os
-# import torch
-# import torchvision.transforms as transforms
-# from torchvision import datasets
-# from torch import nn, optim
-# from torch.utils.data import DataLoader
-
-# def main():
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('--data_dir', type=str, default=os.environ['SM_CHANNEL_TRAIN'])
-#     parser.add_argument('--batch_size', type=int, default=32)
-#     parser.add_argument('--epochs', type=int, default=10)
-#     parser.add_argument('--learning_rate', type=float, default=0.001)
-#     args = parser.parse_args()
-
-#     # Definir transformaciones
-#     transform = transforms.Compose([
-#         transforms.Resize((128, 128)),
-#         transforms.ToTensor(),
-#     ])
-
-#     train_dataset = datasets.ImageFolder(root=args.data_dir, transform=transform)
-
-#     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-
-#     # Definir un modelo simple
-#     model = nn.Sequential(
-        
-#         nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1),
-#         nn.ReLU(),
-#         nn.MaxPool2d(kernel_size=2, stride=2),
-#         nn.Flatten(),
-#         nn.Linear(16 * 64 * 64, 2),  # Ajusta el tamaño de entrada según tu arquitectura
-#     )
-
-#     criterion = nn.CrossEntropyLoss()
-#     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
-
-#     # Entrenar el modelo
-#     model.train()
-#     for epoch in range(args.epochs):
-#         for images, labels in train_loader:
-#             optimizer.zero_grad()
-#             outputs = model(images)
-#             loss = criterion(outputs, labels)
-#             loss.backward()
-#             optimizer.step()
-#             print(f'Epoch [{epoch + 1}/{args.epochs}], Loss: {loss.item():.4f}')
-
-# if __name__ == '__main__':
-#     main()
-
-
 import os
 import argparse
 from torch.utils.data import DataLoader
@@ -100,16 +44,16 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--learning_rate", type=float, default=0.001)
-    parser.add_argument("--data_dir", type=str, default=os.environ.get("SM_CHANNEL_TRAIN"))
+    parser.add_argument("--data_dir", type=str, default=os.environ.get("SM_CHANNEL_TRAINING"))
     parser.add_argument("--model_dir", type=str, default=os.environ.get("SM_MODEL_DIR"))
 
     args = parser.parse_args()
 
     # Validar que la ruta de datos exista
-    if not args.data_dir or not os.path.exists(args.data_dir):
-        raise ValueError(f"No se encontraron datos en la ruta: {args.data_dir}")
+    # if not args.data_dir or not os.path.exists(args.data_dir):
+    #     raise ValueError(f"No se encontraron datos en la ruta: {args.data_dir}")
 
-    print(f"Datos encontrados en: {args.data_dir}")
+    # print(f"Datos encontrados en: {args.data_dir}")
 
     # Transformaciones para los datos
     transform = transforms.Compose([
