@@ -1,0 +1,5 @@
+# Pitaya Freshness Classifier 🐉🔍
+
+## Project Overview
+Deep learning system for automated quality control of dragon fruit using PyTorch. Classifies fruits as **fresh** or **rotten** with 95%+ accuracy to streamline agricultural sorting processes.
+
