@@ -54,10 +54,11 @@ cd dragon-fruit-classification
 ```
 
 ### Configure your AWS credentials
-``bash
+```bash
 aws configure
 
 AWS Access Key ID: [YOUR_ACCESS_KEY]
 AWS Secret Access Key: [YOUR_SECRET_KEY]
-Default region name: [e.g., us-west-2]
+Default region name: [e.g.,us-west-2]
+Default output format: json
 ```
