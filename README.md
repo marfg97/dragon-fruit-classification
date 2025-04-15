@@ -53,3 +53,11 @@ git clone https://github.com/marfg97/dragon-fruit-classification.git
 cd dragon-fruit-classification
 ```
 
+### Configure your AWS credentials
+``bash
+aws configure
+
+AWS Access Key ID: [YOUR_ACCESS_KEY]
+AWS Secret Access Key: [YOUR_SECRET_KEY]
+Default region name: [e.g., us-west-2]
+```
