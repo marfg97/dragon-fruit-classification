@@ -7,7 +7,8 @@ from torch.utils.data import DataLoader, random_split, WeightedRandomSampler
 from torchvision import datasets, transforms
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
-from models import SimpleCNN, torch_models
+# from models import  torch_models
+from models.SimpleCNN import SimpleCNN
 import json
 from config import TrainingConfig
 
@@ -119,7 +120,9 @@ def main():
         class_weights = torch.tensor([sum(counts)/c for c in counts], dtype=torch.float32)
         # Convert class weights
         # class_weights = torch.tensor(json.loads(args.class_weights), dtype=torch.float32)
-        # logger.info(f"Class weights: {class_weights.tolist()}")
+        logger.info(f"Class weights: {class_weights.tolist()}")
+        
+        epoch_metrics = []
         
         # Split dataset
         val_size = int(args.val_split * len(full_dataset))
@@ -171,9 +174,9 @@ def main():
         
         num_classes=len(full_dataset.classes)
         # Initialize model
-        # model = SimpleCNN(num_classes,dropout_rate=args.dropout_rate)
+        model = SimpleCNN(num_classes,dropout_rate=args.dropout_rate)
         # model = torch_models.get_vgg16(num_classes)
-        model = torch_models.get_resnet18(num_classes)
+        # model = torch_models.get_resnet18(num_classes)
         model.to(device)
         logger.info(f"Model initialized:\n{model}")
 
@@ -201,6 +204,8 @@ def main():
             model.train()
             train_loss = 0.0
             
+          
+
             for batch_idx, (inputs, labels) in enumerate(train_loader):
                 inputs, labels = inputs.to(device), labels.to(device)
                 
@@ -219,8 +224,24 @@ def main():
                         f"Avg Loss: {train_loss/(batch_idx+1):.4f}"
                     )
             
-            # Validation
             val_metrics = evaluate(model, val_loader, criterion, device)
+
+            current_lr = optimizer.param_groups[0]['lr']
+            epoch_entry = {
+                'epoch': epoch + 1,
+                'train_loss': train_loss / len(train_loader),
+                'val_loss': val_metrics['loss'],
+                'val_accuracy': val_metrics['accuracy'],
+                'learning_rate': current_lr
+            }
+            for class_name in full_dataset.classes:
+                epoch_entry[f'val_precision_{class_name}'] = val_metrics[f'precision_{class_name}']
+                epoch_entry[f'val_recall_{class_name}'] = val_metrics[f'recall_{class_name}']
+                epoch_entry[f'val_f1_{class_name}'] = val_metrics[f'f1_{class_name}']
+            
+            epoch_metrics.append(epoch_entry)
+            # Validation
+           
             
             # Check for early stopping
             current_metric = val_metrics.get(args.monitor_metric, val_metrics['accuracy'])
@@ -274,6 +295,11 @@ def main():
             )
         
         # Save final model
+        metrics_path = os.path.join(args.model_dir, 'epoch_metrics.json')
+        with open(metrics_path, 'w') as f:
+            json.dump(epoch_metrics, f, indent=4)
+        logger.info(f"\nHistoric metrics saved in: {metrics_path}")
+
         torch.save({
             'model_state_dict': model.state_dict(),
             'class_to_idx': full_dataset.class_to_idx,
