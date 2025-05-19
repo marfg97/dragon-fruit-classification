@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_transforms(augmentation_intensity=0.8, is_train=True):
-    """Transformaciones con aumento de datos solo para entrenamiento"""
+    """Transforms data augmentation for training"""
     base = [
         transforms.Resize((64, 64)),
         transforms.ToTensor(),
@@ -38,7 +38,8 @@ def create_transforms(augmentation_intensity=0.8, is_train=True):
     return transforms.Compose(base)
 
 def get_class_distribution(dataset):
-    """Calcula distribución de clases"""
+    """Class Distribution"""
+
     counts = torch.zeros(len(dataset.classes))
     for _, label in dataset.samples:
         counts[label] += 1
@@ -114,9 +115,11 @@ def main():
         logger.info(f"Classes: {full_dataset.classes}")
         logger.info(f"Class counts: {get_class_distribution(full_dataset).tolist()}")
         
+        counts = get_class_distribution(full_dataset)
+        class_weights = torch.tensor([sum(counts)/c for c in counts], dtype=torch.float32)
         # Convert class weights
-        class_weights = torch.tensor(json.loads(args.class_weights), dtype=torch.float32)
-        logger.info(f"Class weights: {class_weights.tolist()}")
+        # class_weights = torch.tensor(json.loads(args.class_weights), dtype=torch.float32)
+        # logger.info(f"Class weights: {class_weights.tolist()}")
         
         # Split dataset
         val_size = int(args.val_split * len(full_dataset))
@@ -134,8 +137,8 @@ def main():
         train_sampler = None
         if args.use_sampler:
             sample_weights = class_weights[torch.tensor(
-                [label for _, label in full_dataset.samples]
-            )][train_dataset.indices]
+                                [label for _, label in full_dataset.samples]
+                                 )][train_dataset.indices]
             train_sampler = WeightedRandomSampler(
                 sample_weights, 
                 len(train_dataset), 
@@ -169,6 +172,7 @@ def main():
         num_classes=len(full_dataset.classes)
         # Initialize model
         # model = SimpleCNN(num_classes,dropout_rate=args.dropout_rate)
+        # model = torch_models.get_vgg16(num_classes)
         model = torch_models.get_resnet18(num_classes)
         model.to(device)
         logger.info(f"Model initialized:\n{model}")
